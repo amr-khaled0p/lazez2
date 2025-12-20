@@ -1,0 +1,7 @@
+{
+  "name": "Lazez - Premium Food Experience",
+  "description": "A high-end, global-standard digital restaurant platform featuring a dynamic menu, responsive design, and premium UI/UX inspired by international food chains.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
