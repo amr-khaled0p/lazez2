@@ -6,7 +6,16 @@ export const translations = {
       menu: "Menu",
       locations: "Locations",
       orderNow: "Order Now",
-      profile: "Profile"
+      profile: "Profile",
+      login: "Login",
+      logout: "Logout"
+    },
+    auth: {
+      title: "Welcome Back",
+      email: "Email Address",
+      loginBtn: "Sign In",
+      adminHint: "Try admin@lazez.com for admin access",
+      placeholder: "Enter your email"
     },
     hero: {
       new: "🔥 NEW: THE GOLDEN TRUFFLE SERIES",
@@ -26,7 +35,8 @@ export const translations = {
       addToCart: "Add to Cart",
       bestSeller: "Best Seller",
       noResults: "No items found matching your search.",
-      clearFilters: "Clear filters"
+      clearFilters: "Clear filters",
+      outOfStock: "Out of Stock"
     },
     cart: {
       title: "Your Bag",
@@ -42,12 +52,34 @@ export const translations = {
       orders: "My Orders",
       rewards: "Rewards",
       addresses: "Saved Addresses",
+      adminTools: "Admin Panel",
       points: "Lazez Points",
       pointsDesc: "Keep ordering to unlock premium rewards!",
       logout: "Sign Out",
       status: "Status",
       id: "Order ID",
-      date: "Date"
+      date: "Date",
+      trackOrder: "Track Order",
+      reorder: "Re-order",
+      orderPlaced: "Order Placed",
+      preparing: "Kitchen",
+      onWay: "On the way",
+      delivered: "Delivered"
+    },
+    admin: {
+      manageMenu: "Manage Menu",
+      manageOffers: "Global Offers",
+      addItem: "Add Item",
+      editItem: "Edit",
+      deleteItem: "Delete",
+      saveChanges: "Save Changes",
+      itemTitle: "Item Title",
+      itemPrice: "Price",
+      itemDesc: "Description",
+      itemImg: "Image URL",
+      itemCat: "Category",
+      branchStatus: "Branch Status",
+      branchClosed: "Close Branch"
     }
   },
   ar: {
@@ -56,7 +88,16 @@ export const translations = {
       menu: "القائمة",
       locations: "فروعنا",
       orderNow: "اطلب الآن",
-      profile: "حسابي"
+      profile: "حسابي",
+      login: "دخول",
+      logout: "خروج"
+    },
+    auth: {
+      title: "مرحباً بك مجدداً",
+      email: "البريد الإلكتروني",
+      loginBtn: "تسجيل الدخول",
+      adminHint: "استخدم admin@lazez.com لدخول المسؤول",
+      placeholder: "أدخل بريدك الإلكتروني"
     },
     hero: {
       new: "🔥 جديد: سلسلة ترافل الذهبية",
@@ -76,7 +117,8 @@ export const translations = {
       addToCart: "أضف للسلة",
       bestSeller: "الأكثر مبيعاً",
       noResults: "لم يتم العثور على نتائج للبحث.",
-      clearFilters: "مسح الفلاتر"
+      clearFilters: "مسح الفلاتر",
+      outOfStock: "نفذت الكمية"
     },
     cart: {
       title: "حقيبتك",
@@ -92,12 +134,34 @@ export const translations = {
       orders: "طلباتي",
       rewards: "المكافآت",
       addresses: "العناوين المحفوظة",
+      adminTools: "لوحة التحكم للمسؤول",
       points: "نقاط لذيذ",
       pointsDesc: "استمر في الطلب لفتح مكافآت مميزة!",
       logout: "تسجيل الخروج",
       status: "الحالة",
       id: "رقم الطلب",
-      date: "التاريخ"
+      date: "التاريخ",
+      trackOrder: "تتبع الطلب",
+      reorder: "إعادة طلب",
+      orderPlaced: "تم الطلب",
+      preparing: "في المطبخ",
+      onWay: "في الطريق",
+      delivered: "تم التوصيل"
+    },
+    admin: {
+      manageMenu: "إدارة القائمة",
+      manageOffers: "العروض العالمية",
+      addItem: "إضافة منتج",
+      editItem: "تعديل",
+      deleteItem: "حذف",
+      saveChanges: "حفظ التغييرات",
+      itemTitle: "اسم المنتج",
+      itemPrice: "السعر",
+      itemDesc: "الوصف",
+      itemImg: "رابط الصورة",
+      itemCat: "الفئة",
+      branchStatus: "حالة الفرع",
+      branchClosed: "إغلاق الفرع"
     }
   }
 };
