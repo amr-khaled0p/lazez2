@@ -1,93 +1,102 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Star, Clock, Flame, ShieldCheck, ChevronRight } from 'lucide-react';
-import { MENU_ITEMS } from '../constants';
-import { useApp } from '../AppContext';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowRight, Sparkles, X } from 'lucide-react';
+import { useStore } from '../store';
+import { translations } from '../translations';
 
-const Home: React.FC = () => {
-  const { t, addToCart } = useApp();
-  const bestSellers = MENU_ITEMS.filter(item => item.isBestSeller).slice(0, 3);
+const AIMealPicker = () => {
+  const { menu } = useStore();
+  const [selected, setSelected] = useState<any>(null);
+  const [isSpinning, setIsSpinning] = useState(false);
+
+  const pickRandom = () => {
+    setIsSpinning(true);
+    setTimeout(() => {
+      const random = menu[Math.floor(Math.random() * menu.length)];
+      setSelected(random);
+      setIsSpinning(false);
+    }, 1500);
+  };
+
+  return (
+    <div className="relative py-32 px-8 bg-primary/5 dark:bg-primary/10 overflow-hidden">
+      <div className="max-w-4xl mx-auto text-center relative z-10">
+        <div className="inline-flex items-center gap-2 bg-primary/20 text-primary px-6 py-2 rounded-full font-black text-xs uppercase mb-8">
+          <Sparkles size={14} /> AI Recommendation
+        </div>
+        <h2 className="text-5xl md:text-7xl font-black text-secondary dark:text-white mb-8 tracking-tighter">
+          محتار تطلب إيه؟ <br /> دعنا نختار لك <span className="text-primary italic">الأفضل</span>
+        </h2>
+        <button onClick={pickRandom} disabled={isSpinning} className="bg-primary text-white px-12 py-6 rounded-3xl font-black text-xl shadow-2xl hover:scale-105 transition-all disabled:opacity-50">
+          {isSpinning ? 'جاري التفكير...' : 'فاجئني بوجبة!'}
+        </button>
+
+        <AnimatePresence>
+          {selected && !isSpinning && (
+            <motion.div initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} className="mt-12 bg-white dark:bg-secondary p-8 rounded-[3rem] shadow-2xl border dark:border-white/10 max-w-lg mx-auto relative">
+              <button onClick={() => setSelected(null)} className="absolute top-6 right-6 text-gray-400"><X size={20} /></button>
+              <img src={selected.image} className="w-full h-48 object-cover rounded-2xl mb-6 shadow-lg" />
+              <h3 className="text-2xl font-black dark:text-white mb-2">{selected.name}</h3>
+              <p className="text-gray-500 text-sm mb-6">{selected.description}</p>
+              <Link to="/menu" className="block w-full bg-brandGray dark:bg-white/5 dark:text-white py-4 rounded-xl font-black">اطلبها الآن</Link>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </div>
+  );
+};
+
+const Home = () => {
+  const { lang, menu, settings } = useStore();
+  const t = translations[lang];
+  const bestSellers = menu.filter(item => item.isBestSeller).slice(0, 3);
 
   return (
     <div className="overflow-hidden">
-      <section className="relative min-h-[85vh] flex items-center bg-white">
-        <div className="absolute top-0 right-0 w-1/2 h-full bg-accent/20 rounded-l-[100px] rtl:rounded-l-none rtl:rounded-r-[100px] rtl:left-0 rtl:right-auto hidden lg:block -z-0"></div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 py-12 lg:py-0">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <motion.div 
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="text-center lg:text-left rtl:lg:text-right"
-            >
-              <span className="inline-block px-4 py-2 bg-primary/10 text-primary rounded-full font-bold text-sm mb-6">
-                {t.hero.new}
-              </span>
-              <h1 className="text-6xl md:text-8xl font-black text-brandDark mb-6 leading-tight tracking-tighter">
-                {t.hero.title1} <br />
-                <span className="text-primary italic">{t.hero.title2}</span>
-              </h1>
-              <p className="text-xl text-gray-600 mb-10 max-w-lg mx-auto lg:mx-0 leading-relaxed font-medium">
-                {t.hero.desc}
-              </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start space-y-4 sm:space-y-0 sm:space-x-4 rtl:space-x-reverse">
-                <Link to="/menu" className="w-full sm:w-auto px-10 py-5 bg-primary text-white rounded-full font-black text-lg hover-scale shadow-2xl shadow-red-200 flex items-center justify-center space-x-2 rtl:space-x-reverse">
-                  <span>{t.hero.cta}</span>
-                  <ArrowRight size={20} className="rtl:rotate-180" />
-                </Link>
-                <Link to="/contact" className="w-full sm:w-auto px-10 py-5 border-2 border-brandDark text-brandDark rounded-full font-bold text-lg hover:bg-brandDark hover:text-white transition-all">
-                  {t.hero.cta2}
-                </Link>
-              </div>
-            </motion.div>
-            
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="relative hover-scale cursor-pointer group"
-            >
-              <div className="absolute inset-0 bg-accent rounded-full opacity-10 blur-3xl group-hover:opacity-20 transition-opacity"></div>
-              <img src="https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&q=80&w=1000" className="relative z-10 w-full h-auto rounded-[3rem] shadow-2xl" alt="Hero" />
-            </motion.div>
+      <section className="relative min-h-screen flex items-center pt-32 px-8">
+        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-20 items-center">
+          <motion.div initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }}>
+            <span className="px-6 py-2 bg-primary/10 text-primary rounded-full font-black text-xs uppercase mb-8 inline-block">لأول مرة في مصر</span>
+            <h1 className="text-7xl md:text-9xl font-black text-secondary dark:text-white leading-[0.85] tracking-tighter mb-8">
+              {settings.heroTitle.split(' ').slice(0,-1).join(' ')} <br />
+              <span className="text-primary italic">{settings.heroTitle.split(' ').pop()}</span>
+            </h1>
+            <p className="text-xl text-gray-500 dark:text-white/60 mb-12 max-w-lg font-medium">{settings.heroSubtitle}</p>
+            <div className="flex flex-col sm:flex-row gap-6">
+              <Link to="/menu" className="bg-primary text-white px-12 py-6 rounded-3xl font-black text-xl hover:scale-105 transition-all shadow-2xl shadow-primary/20 flex items-center justify-center gap-3">
+                {t.hero.cta} <ArrowRight size={24} />
+              </Link>
+            </div>
+          </motion.div>
+          <div className="relative">
+             <motion.img initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} src="https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&q=80&w=1200" className="rounded-[5rem] shadow-2xl rotate-2" />
           </div>
         </div>
       </section>
+      
+      <AIMealPicker />
 
-      {/* Best Sellers */}
-      <section className="py-24 bg-brandLight">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row justify-between items-end mb-16">
-            <div>
-              <span className="text-primary font-bold tracking-widest uppercase text-sm mb-4 block">{t.menu.popular}</span>
-              <h2 className="text-4xl md:text-5xl font-black text-brandDark">{t.menu.bestSeller}</h2>
-            </div>
-            <Link to="/menu" className="group flex items-center space-x-2 rtl:space-x-reverse text-primary font-black text-lg mt-4 md:mt-0">
-              <span>{t.menu.title}</span>
-              <ChevronRight className="group-hover:translate-x-2 transition-transform rtl:rotate-180" />
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+      <section className="py-32 px-8">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-6xl font-black text-secondary dark:text-white mb-16 tracking-tighter text-center">الأكثر طلباً</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
             {bestSellers.map((item) => (
-              <div key={item.id} className="bg-white rounded-[2rem] overflow-hidden soft-shadow group hover-scale">
-                <div className="relative h-72">
-                  <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
-                </div>
-                <div className="p-8">
-                  <div className="flex justify-between items-start mb-4">
-                    <h3 className="text-2xl font-black text-brandDark">{item.name}</h3>
-                    <span className="text-primary font-black text-xl">${item.price}</span>
+              <motion.div whileHover={{ y: -10 }} key={item.id} className="bg-white dark:bg-secondary rounded-[3rem] overflow-hidden border dark:border-white/10 hover:shadow-2xl transition-all duration-500 group">
+                <div className="h-72 overflow-hidden relative">
+                  <img src={item.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                  <div className="absolute top-6 left-6 bg-white/90 dark:bg-black/80 dark:text-white backdrop-blur px-4 py-2 rounded-full font-black text-xs shadow-lg">
+                    ج.م {item.price}
                   </div>
-                  <p className="text-gray-500 mb-6 line-clamp-2 font-medium">{item.description}</p>
-                  <button 
-                    onClick={() => addToCart(item)}
-                    className="w-full py-4 bg-gray-50 group-hover:bg-primary group-hover:text-white text-brandDark font-bold rounded-2xl transition-all"
-                  >
-                    {t.menu.addToCart}
-                  </button>
                 </div>
-              </div>
+                <div className="p-10">
+                  <h3 className="text-2xl font-black mb-3 dark:text-white">{item.name}</h3>
+                  <p className="text-gray-400 font-medium mb-8 line-clamp-2">{item.description}</p>
+                  <Link to="/menu" className="w-full bg-brandGray dark:bg-white/5 py-4 rounded-2xl flex items-center justify-center font-black text-primary hover:bg-primary hover:text-white transition-all">اطلب الآن</Link>
+                </div>
+              </motion.div>
             ))}
           </div>
         </div>

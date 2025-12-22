@@ -7,6 +7,18 @@ export enum Category {
   DRINKS = 'Drinks'
 }
 
+export interface Modifier {
+  id: string;
+  name: string;
+  price: number;
+  stock: number;
+}
+
+export interface Exclusion {
+  id: string;
+  name: string;
+}
+
 export interface MenuItem {
   id: string;
   name: string;
@@ -15,6 +27,9 @@ export interface MenuItem {
   category: Category;
   image: string;
   isBestSeller?: boolean;
+  stock: number;
+  modifiers?: Modifier[];
+  exclusions?: Exclusion[]; // المكونات التي يمكن إزالتها
 }
 
 export interface Branch {
@@ -24,4 +39,26 @@ export interface Branch {
   phone: string;
   hours: string;
   mapUrl: string;
+}
+
+export interface Sale {
+  id: string;
+  items: { 
+    name: string; 
+    quantity: number; 
+    price: number;
+    extras?: string[];
+    removals?: string[];
+  }[];
+  total: number;
+  date: string;
+  paymentMethod: 'Cash' | 'Card';
+  type: 'Online' | 'POS';
+}
+
+export interface SiteSettings {
+  heroTitle: string;
+  heroSubtitle: string;
+  primaryColor: string;
+  isClosed: boolean;
 }

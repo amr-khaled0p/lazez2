@@ -1,74 +1,77 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Category, MenuItem } from '../types';
-import { ShoppingBag, Search, X, Star, Clock, Flame } from 'lucide-react';
-import { useApp } from '../AppContext';
+import { useStore } from '../store';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Search, Flame, X, Plus, Info, Star } from 'lucide-react';
+import { translations } from '../translations';
 
-const QuickViewModal: React.FC<{ item: MenuItem | null; onClose: () => void }> = ({ item, onClose }) => {
-  const { addToCart, t } = useApp();
+// ميزة تظليل نصوص البحث
+const HighlightText = ({ text, query }: { text: string, query: string }) => {
+  if (!query.trim()) return <>{text}</>;
+  const parts = text.split(new RegExp(`(${query})`, 'gi'));
+  return (
+    <span>
+      {parts.map((part, i) => 
+        part.toLowerCase() === query.toLowerCase() 
+          ? <span key={i} className="bg-primary/30 text-primary dark:text-white rounded-md px-1">{part}</span> 
+          : part
+      )}
+    </span>
+  );
+};
+
+const QuickViewModal = ({ item, onClose }: { item: MenuItem | null, onClose: () => void }) => {
+  const { addToCart, lang } = useStore();
+  const t = translations[lang];
+  const [extras, setExtras] = useState<{name: string, cal: number, price: number}[]>([]);
+
   if (!item) return null;
+
+  const extraOptions = [
+    { name: 'جبنة زيادة', cal: 120, price: 15 },
+    { name: 'صوص سري', cal: 40, price: 8 },
+    { name: 'هالبينو', cal: 10, price: 5 }
+  ];
+
+  const toggleExtra = (extra: any) => {
+    setExtras(prev => prev.find(e => e.name === extra.name) ? prev.filter(e => e.name !== extra.name) : [...prev, extra]);
+  };
+
+  const currentPrice = item.price + extras.reduce((s, e) => s + e.price, 0);
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="absolute inset-0 bg-black/60 backdrop-blur-md" />
-        <motion.div
-          initial={{ scale: 0.9, opacity: 0, y: 20 }}
-          animate={{ scale: 1, opacity: 1, y: 0 }}
-          exit={{ scale: 0.9, opacity: 0, y: 20 }}
-          className="relative bg-white w-full max-w-4xl rounded-[4rem] overflow-hidden shadow-2xl flex flex-col md:flex-row"
-        >
-          <button onClick={onClose} className="absolute top-8 right-8 z-10 p-3 bg-white/80 backdrop-blur rounded-full hover:bg-white shadow-lg transition-colors">
-            <X size={24} />
-          </button>
-          
-          <div className="md:w-1/2 h-[400px] md:h-auto">
+      <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4">
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} className="absolute inset-0 bg-black/70 backdrop-blur-md" />
+        <motion.div initial={{ scale: 0.9, opacity: 0, y: 30 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0 }} className="relative bg-white dark:bg-secondary w-full max-w-4xl rounded-[3rem] overflow-hidden flex flex-col md:flex-row shadow-2xl">
+          <button onClick={onClose} className="absolute top-6 right-6 z-10 p-2 bg-white/20 backdrop-blur rounded-full text-white"><X size={24} /></button>
+          <div className="md:w-1/2 h-72 md:h-auto">
             <img src={item.image} className="w-full h-full object-cover" alt={item.name} />
           </div>
-          
-          <div className="md:w-1/2 p-12 md:p-16 flex flex-col justify-center">
-            <div className="flex items-center space-x-3 rtl:space-x-reverse mb-6">
-              <span className="px-5 py-2 bg-primary/10 text-primary rounded-full text-xs font-black uppercase tracking-widest">
-                {item.category}
-              </span>
-              {item.isBestSeller && (
-                <span className="px-5 py-2 bg-accent text-brandDark rounded-full text-xs font-black uppercase tracking-widest">
-                  {t.menu.bestSeller}
-                </span>
-              )}
-            </div>
+          <div className="md:w-1/2 p-10 dark:text-white overflow-y-auto max-h-[80vh]">
+            <span className="text-primary font-black uppercase text-xs tracking-widest">{item.category}</span>
+            <h2 className="text-4xl font-black mt-2">{item.name}</h2>
+            <p className="text-gray-500 dark:text-gray-400 mt-4 leading-relaxed">{item.description}</p>
             
-            <h2 className="text-5xl font-black text-brandDark mb-6 leading-tight tracking-tighter">{item.name}</h2>
-            <p className="text-gray-500 text-xl mb-10 font-medium leading-relaxed">{item.description}</p>
-            
-            <div className="grid grid-cols-3 gap-6 mb-12">
-              <div className="text-center p-6 bg-gray-50 rounded-[2rem]">
-                <Star className="mx-auto mb-3 text-accent" fill="currentColor" size={24} />
-                <span className="text-xs font-black text-gray-400 uppercase tracking-widest">4.9 Rating</span>
-              </div>
-              <div className="text-center p-6 bg-gray-50 rounded-[2rem]">
-                <Clock className="mx-auto mb-3 text-primary" size={24} />
-                <span className="text-xs font-black text-gray-400 uppercase tracking-widest">15 Min</span>
-              </div>
-              <div className="text-center p-6 bg-gray-50 rounded-[2rem]">
-                <Flame className="mx-auto mb-3 text-orange-500" size={24} />
-                <span className="text-xs font-black text-gray-400 uppercase tracking-widest">540 Cal</span>
+            <div className="mt-8 space-y-4">
+              <h4 className="font-black">أضف لمستك:</h4>
+              <div className="grid grid-cols-1 gap-2">
+                {extraOptions.map(opt => (
+                  <button key={opt.name} onClick={() => toggleExtra(opt)} className={`p-4 rounded-2xl border-2 flex justify-between items-center transition-all ${extras.find(e => e.name === opt.name) ? 'border-primary bg-primary/10' : 'border-gray-100 dark:border-white/10'}`}>
+                    <span className="font-bold">{opt.name}</span>
+                    <span className="text-xs opacity-60">+{opt.price} ج.م</span>
+                  </button>
+                ))}
               </div>
             </div>
 
-            <div className="flex items-center justify-between mt-auto">
-              <div className="flex flex-col">
-                <span className="text-gray-400 font-black uppercase text-xs tracking-[0.2em] mb-1">Price</span>
-                <span className="text-5xl font-black text-brandDark">${item.price}</span>
-              </div>
-              <button 
-                onClick={() => { addToCart(item); onClose(); }}
-                className="bg-primary text-white px-12 py-6 rounded-[2rem] font-black text-xl hover-scale shadow-2xl shadow-red-100 flex items-center space-x-3 rtl:space-x-reverse"
-              >
-                <ShoppingBag size={24} />
-                <span>{t.menu.addToCart}</span>
-              </button>
+            <div className="mt-10 pt-8 border-t dark:border-white/10 flex items-center justify-between">
+               <div>
+                 <p className="text-xs text-gray-400 font-bold">السعر النهائي</p>
+                 <p className="text-3xl font-black">ج.م {currentPrice.toFixed(2)}</p>
+               </div>
+               <button onClick={() => { addToCart(item); onClose(); }} className="bg-primary text-white px-8 py-4 rounded-2xl font-black shadow-xl shadow-primary/20 hover:scale-105 transition-all">إضافة للسلة</button>
             </div>
           </div>
         </motion.div>
@@ -77,114 +80,68 @@ const QuickViewModal: React.FC<{ item: MenuItem | null; onClose: () => void }> =
   );
 };
 
-const MenuPage: React.FC = () => {
-  const { t, addToCart, menu } = useApp();
-  const [activeCategory, setActiveCategory] = useState<Category>(Category.ALL);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [quickViewItem, setQuickViewItem] = useState<MenuItem | null>(null);
+const MenuPage = () => {
+  const { lang, menu, addToCart } = useStore();
+  const t = translations[lang];
+  const [activeCat, setActiveCat] = useState<Category>(Category.ALL);
+  const [search, setSearch] = useState('');
+  const [quickView, setQuickView] = useState<MenuItem | null>(null);
 
-  const filteredItems = menu.filter(item => {
-    const matchesCategory = activeCategory === Category.ALL || item.category === activeCategory;
-    const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
+  const filtered = useMemo(() => {
+    return menu.filter(i => {
+      const matchCat = activeCat === Category.ALL || i.category === activeCat;
+      const matchSearch = i.name.toLowerCase().includes(search.toLowerCase()) || i.description.toLowerCase().includes(search.toLowerCase());
+      return matchCat && matchSearch;
+    });
+  }, [menu, activeCat, search]);
 
   return (
-    <div className="min-h-screen bg-brandLight pb-32">
-      <QuickViewModal item={quickViewItem} onClose={() => setQuickViewItem(null)} />
+    <div className="min-h-screen bg-white dark:bg-[#1a1c23] transition-colors duration-500 pb-20">
+      <QuickViewModal item={quickView} onClose={() => setQuickView(null)} />
       
-      <div className="bg-white border-b border-gray-100 pt-24 pb-20 relative overflow-hidden">
-        <div className="absolute -top-24 -left-24 w-96 h-96 bg-primary/5 rounded-full blur-3xl"></div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-          <h1 className="text-6xl md:text-8xl font-black text-brandDark mb-6 tracking-tighter">{t.menu.title}</h1>
-          <p className="text-2xl text-gray-500 max-w-3xl mx-auto font-medium leading-relaxed">{t.menu.desc}</p>
-        </div>
+      <div className="bg-secondary dark:bg-black/40 py-24 px-8 text-center">
+        <motion.h1 initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="text-6xl md:text-8xl font-black text-white tracking-tighter">قائمة الطعام</motion.h1>
       </div>
 
-      <div className="sticky top-[96px] z-40 bg-white/80 backdrop-blur-xl border-b border-gray-100 py-8 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col xl:flex-row items-center justify-between gap-10">
-            <div className="flex items-center space-x-3 rtl:space-x-reverse overflow-x-auto pb-4 xl:pb-0 w-full xl:w-auto scrollbar-hide">
-              {Object.values(Category).map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => setActiveCategory(cat)}
-                  className={`px-10 py-4 rounded-[1.5rem] font-black text-sm transition-all whitespace-nowrap uppercase tracking-widest ${
-                    activeCategory === cat 
-                      ? 'bg-primary text-white shadow-2xl shadow-red-100 scale-105' 
-                      : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-            <div className="relative w-full xl:w-[450px]">
-              <Search className="absolute left-6 rtl:left-auto rtl:right-6 top-1/2 -translate-y-1/2 text-gray-400" size={24} />
-              <input 
-                type="text" 
-                placeholder={t.menu.searchPlaceholder}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-16 pr-6 rtl:pl-6 rtl:pr-16 py-6 bg-gray-100 border-none rounded-[2rem] focus:ring-4 focus:ring-primary/10 text-brandDark font-black text-lg placeholder-gray-400"
-              />
-            </div>
+      <div className="sticky top-20 z-50 bg-white/80 dark:bg-secondary/80 backdrop-blur-xl border-b dark:border-white/5 py-6 px-4">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-6 items-center">
+          <div className="flex gap-2 overflow-x-auto no-scrollbar w-full md:w-auto pb-2 md:pb-0">
+            {Object.values(Category).map(c => (
+              <button key={c} onClick={() => setActiveCat(c)} className={`px-8 py-3 rounded-2xl font-black text-sm whitespace-nowrap transition-all ${activeCat === c ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-105' : 'bg-brandGray dark:bg-white/5 dark:text-white/60 text-gray-400 hover:bg-gray-200'}`}>
+                {c === Category.ALL ? (lang === 'ar' ? 'الكل' : 'All') : c}
+              </button>
+            ))}
+          </div>
+          <div className="relative w-full md:flex-grow">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+            <input type="text" placeholder={t.menu.searchPlaceholder} className="w-full pl-12 pr-6 py-4 rounded-2xl bg-brandGray dark:bg-white/5 border-none outline-none font-bold dark:text-white focus:ring-2 ring-primary/20" value={search} onChange={e => setSearch(e.target.value)} />
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-24">
-        <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-12">
-          {filteredItems.map((item) => (
-            <motion.div 
-              layout
-              key={item.id} 
-              className="bg-white rounded-[3.5rem] overflow-hidden soft-shadow group hover-scale border border-gray-50 cursor-pointer flex flex-col h-full"
-              onClick={() => setQuickViewItem(item)}
-            >
-              <div className="relative h-72 overflow-hidden">
-                <img src={item.image} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" alt={item.name} />
-                {item.isBestSeller && (
-                  <div className="absolute top-6 right-6 bg-accent text-brandDark font-black px-4 py-2 rounded-full text-[10px] uppercase tracking-widest shadow-xl">
-                    {t.menu.popular}
-                  </div>
-                )}
-                <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                   <div className="p-4 bg-white rounded-full shadow-2xl text-primary font-black scale-0 group-hover:scale-100 transition-transform">Quick View</div>
-                </div>
-              </div>
-              <div className="p-10 flex flex-col flex-grow">
-                <span className="text-[10px] font-black text-primary uppercase tracking-[0.3em] mb-4 block">{item.category}</span>
-                <h3 className="text-2xl font-black text-brandDark mb-4 leading-tight">{item.name}</h3>
-                <p className="text-gray-500 text-lg mb-10 line-clamp-2 min-h-[56px] font-medium leading-relaxed">{item.description}</p>
-                <div className="flex items-center justify-between mt-auto">
-                  <span className="text-3xl font-black text-brandDark">${item.price}</span>
-                  <button 
-                    onClick={(e) => { e.stopPropagation(); addToCart(item); }}
-                    className="bg-primary text-white p-5 rounded-3xl hover:bg-brandDark transition-all shadow-xl shadow-red-100"
-                  >
-                    <ShoppingBag size={24} />
+      <div className="max-w-7xl mx-auto px-4 mt-12">
+        <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          <AnimatePresence mode="popLayout">
+            {filtered.map(item => (
+              <motion.div layout key={item.id} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="bg-white dark:bg-secondary rounded-[2.5rem] overflow-hidden border dark:border-white/5 shadow-sm hover:shadow-2xl transition-all group">
+                <div className="h-64 relative overflow-hidden">
+                  <img src={item.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                  <button onClick={() => setQuickView(item)} className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <div className="bg-white p-4 rounded-full shadow-xl"><Info size={24} className="text-primary" /></div>
                   </button>
                 </div>
-              </div>
-            </motion.div>
-          ))}
+                <div className="p-8">
+                  <h3 className="text-xl font-black dark:text-white"><HighlightText text={item.name} query={search} /></h3>
+                  <p className="text-gray-400 text-sm mt-2 line-clamp-2"><HighlightText text={item.description} query={search} /></p>
+                  <div className="mt-8 flex items-center justify-between">
+                    <span className="text-2xl font-black dark:text-white">ج.م {item.price}</span>
+                    <button onClick={() => addToCart(item)} className="bg-brandGray dark:bg-white/10 dark:text-white p-4 rounded-2xl hover:bg-primary hover:text-white transition-all"><Plus size={20} /></button>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
         </motion.div>
-        
-        {filteredItems.length === 0 && (
-          <div className="text-center py-40">
-            <div className="w-32 h-32 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-10">
-              <Search size={56} className="text-gray-300" />
-            </div>
-            <h3 className="text-4xl font-black text-gray-400 mb-6">{t.menu.noResults}</h3>
-            <button 
-              onClick={() => {setSearchQuery(''); setActiveCategory(Category.ALL);}}
-              className="text-primary font-black text-xl hover:underline underline-offset-8"
-            >
-              {t.menu.clearFilters}
-            </button>
-          </div>
-        )}
       </div>
     </div>
   );

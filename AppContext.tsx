@@ -14,6 +14,12 @@ interface User {
   isAdmin: boolean;
 }
 
+interface Notification {
+  message: string;
+  type: 'success' | 'error';
+  id: number;
+}
+
 interface AppContextType {
   lang: 'en' | 'ar';
   setLang: (lang: 'en' | 'ar') => void;
@@ -31,6 +37,8 @@ interface AppContextType {
   addMenuItem: (item: MenuItem) => void;
   updateMenuItem: (item: MenuItem) => void;
   deleteMenuItem: (id: string) => void;
+  notifications: Notification[];
+  removeNotification: (id: number) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -40,8 +48,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   
-  // Persistent Menu State
   const [menu, setMenu] = useState<MenuItem[]>(() => {
     const saved = localStorage.getItem('lazez_menu');
     return saved ? JSON.parse(saved) : DEFAULT_MENU;
@@ -59,6 +67,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const t = translations[lang];
 
+  const addNotification = (message: string, type: 'success' | 'error' = 'success') => {
+    const id = Date.now();
+    setNotifications(prev => [...prev, { message, type, id }]);
+    setTimeout(() => removeNotification(id), 3000);
+  };
+
+  const removeNotification = (id: number) => {
+    setNotifications(prev => prev.filter(n => n.id !== id));
+  };
+
   const login = (email: string) => {
     const isAdmin = email.toLowerCase() === 'admin@lazez.com';
     const newUser = {
@@ -68,14 +86,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
     setUser(newUser);
     localStorage.setItem('lazez_user', JSON.stringify(newUser));
+    addNotification(lang === 'ar' ? 'تم تسجيل الدخول بنجاح' : 'Logged in successfully');
   };
 
   const logout = () => {
     setUser(null);
     localStorage.removeItem('lazez_user');
+    addNotification(lang === 'ar' ? 'تم تسجيل الخروج' : 'Logged out');
   };
 
-  // Recovery of user on refresh
   useEffect(() => {
     const savedUser = localStorage.getItem('lazez_user');
     if (savedUser) setUser(JSON.parse(savedUser));
@@ -89,7 +108,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       return [...prev, { ...item, quantity: 1 }];
     });
-    setIsCartOpen(true);
+    // MODIFIED: Do not open cart automatically
+    addNotification(lang === 'ar' ? `تمت إضافة ${item.name} للسلة` : `Added ${item.name} to bag`);
   };
 
   const removeFromCart = (id: string) => {
@@ -106,7 +126,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }));
   };
 
-  // CMS Logic
   const addMenuItem = (item: MenuItem) => setMenu(prev => [...prev, item]);
   const updateMenuItem = (item: MenuItem) => setMenu(prev => prev.map(i => i.id === item.id ? item : i));
   const deleteMenuItem = (id: string) => setMenu(prev => prev.filter(i => i.id !== id));
@@ -114,7 +133,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   return (
     <AppContext.Provider value={{
       lang, setLang, t, cart, addToCart, removeFromCart, updateQuantity, isCartOpen, setIsCartOpen,
-      user, login, logout, menu, addMenuItem, updateMenuItem, deleteMenuItem
+      user, login, logout, menu, addMenuItem, updateMenuItem, deleteMenuItem,
+      notifications, removeNotification
     }}>
       {children}
     </AppContext.Provider>
