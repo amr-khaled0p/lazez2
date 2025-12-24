@@ -9,41 +9,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200..1000&family=Inter:wght@100..900&display=swap" rel="stylesheet">
-    <style>
-      :root {
-        --primary: #FF6B35;
-        --secondary: #2D3142;
-        --accent: #4F9D69;
-      }
-      body {
-        font-family: 'Cairo', sans-serif;
-        scroll-behavior: smooth;
-        background-color: #FDFDFD;
-      }
-      .font-inter { font-family: 'Inter', sans-serif; }
-      .glass-nav {
-        background: rgba(255, 255, 255, 0.8);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-      }
-      .skeleton {
-        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-        background-size: 200% 100%;
-        animation: loading 1.5s infinite;
-      }
-      @keyframes loading {
-        0% { background-position: 200% 0; }
-        100% { background-position: -200% 0; }
-      }
-      .cart-pop { animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-      @keyframes pop {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.4); }
-        100% { transform: scale(1); }
-      }
-    </style>
     <script>
       tailwind.config = {
+        darkMode: 'class',
         theme: {
           extend: {
             colors: {
@@ -51,15 +19,21 @@
               secondary: '#2D3142',
               accent: '#4F9D69',
               brandGray: '#F4F4F9'
-            },
-            borderRadius: {
-              '4xl': '2rem',
-              '5xl': '3rem'
             }
           }
         }
       }
     </script>
+    <style>
+      body {
+        font-family: 'Cairo', sans-serif;
+        scroll-behavior: smooth;
+        background-color: #FDFDFD;
+      }
+      .font-inter { font-family: 'Inter', sans-serif; }
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
     <script type="importmap">
 {
   "imports": {
@@ -72,7 +46,9 @@
     "react": "https://esm.sh/react@^19.2.3",
     "clsx": "https://esm.sh/clsx@^2.1.1",
     "tailwind-merge": "https://esm.sh/tailwind-merge@^2.3.0",
-    "zustand/": "https://esm.sh/zustand@^5.0.9/"
+    "zustand/": "https://esm.sh/zustand@^5.0.9/",
+    "vite": "https://esm.sh/vite@^7.3.0",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2"
   }
 }
 </script>
